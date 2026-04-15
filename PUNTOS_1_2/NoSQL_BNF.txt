@@ -1,0 +1,39 @@
+<programa>      ::= <sentencia>+
+
+<sentencia>     ::= <create_stmt>
+                  | <read_stmt>
+                  | <update_stmt>
+                  | <delete_stmt>
+
+<create_stmt>   ::= CREATE <IDENT> <campo_lista> END
+
+<read_stmt>     ::= READ <col_lista> END
+
+<update_stmt>   ::= UPDATE <IDENT> <campo_lista> END
+
+<delete_stmt>   ::= DELETE <col_lista> END
+
+<col_lista>     ::= ALL
+                  | <IDENT> { "," <IDENT> }
+
+<campo_lista>   ::= <campo> { ";" <campo> }
+
+<campo>         ::= <IDENT> ":" <valor>
+
+<valor>         ::= <NUMBER>
+                  | <STRING>
+                  | <IDENT>
+                  | <lista_valor>
+                  | <doc_anidado>
+
+<lista_valor>   ::= "[" "]"
+                  | "[" <valor> { "," <valor> } "]"
+
+<doc_anidado>   ::= "{" <campo_lista> "}"
+
+<NUMBER>        ::= [ "-" ] <dígito>+ [ "." <dígito>+ ]
+
+<STRING>        ::= '"' <carácter>* '"'
+                  | "'" <carácter>* "'"
+
+<IDENT>         ::= <letra> { <letra> | <dígito> | "_" }

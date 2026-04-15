@@ -1,0 +1,34 @@
+CREATE usuarios
+    nombre: "Juan Pérez";
+    edad: 25;
+    activo: true;
+    direccion: { ciudad: "Bogotá"; pais: Colombia }
+END
+
+CREATE usuarios
+    nombre: "María López";
+    edad: 30;
+    activo: false;
+    direccion: { ciudad: "Medellín"; pais: Colombia }
+END
+
+CREATE productos
+    nombre: laptop;
+    precio: 2500000;
+    tags: [electronica, computadores, oferta]
+END
+
+READ usuarios END
+
+READ ALL END
+
+UPDATE usuarios
+    activo: true;
+    edad: 31
+END
+
+READ usuarios END
+
+DELETE productos END
+
+READ ALL END
