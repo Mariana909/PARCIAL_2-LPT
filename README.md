@@ -156,7 +156,7 @@ if e1 then if e2 then otras else otras
 
 Para esta misma cadena se pueden construir **dos árboles de derivación distintos**, dependiendo de con cuál `then` se empareja el `else`. Los árboles se graficaron con la herramienta online [https://mshang.ca/syntree/](https://mshang.ca/syntree/):
 
-<img width="1114" height="326" alt="image" src="https://github.com/user-attachments/assets/2181428b-222b-40d6-9df2-a4953d19e133" 
+<img width="1114" height="326" alt="image" src="https://github.com/user-attachments/assets/2181428b-222b-40d6-9df2-a4953d19e133" />
 
 <img width="649" height="326" alt="image" src="https://github.com/user-attachments/assets/0298242c-9c69-43ba-b611-885f756d51c7" />
 
