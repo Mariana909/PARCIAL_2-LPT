@@ -1,0 +1,20 @@
+<programa>           ::= <sentencia>+
+
+<sentencia>          ::= <prop> | <asignacion>
+
+<asignacion>         ::= IDENT "=" <expr>
+
+<prop>               ::= <prop_emparejada>
+                       | <prop_no_emparejada>
+
+<prop_emparejada>    ::= "if" <condicion> "then" <prop_emparejada> "else" <prop_emparejada>
+                       | otras
+
+<prop_no_emparejada> ::= "if" <condicion> "then" <prop>
+                       | "if" <condicion> "then" <prop_emparejada> "else" <prop_no_emparejada>
+
+<condicion>          ::= <expr> <op> <expr>
+
+<expr>               ::= NUMBER | IDENT
+
+<op>                 ::= "==" | "!=" | "<" | ">"

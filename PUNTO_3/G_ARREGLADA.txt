@@ -1,0 +1,8 @@
+<prop>            ::= <prop_emparejada>
+                    | <prop_no_emparejada>
+
+<prop_emparejada> ::= "if" <expr> "then" <prop_emparejada> "else" <prop_emparejada>
+                    | otras
+
+<prop_no_emparejada> ::= "if" <expr> "then" <prop>
+                       | "if" <expr> "then" <prop_emparejada> "else" <prop_no_emparejada>
