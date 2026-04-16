@@ -53,7 +53,7 @@ try:
             V_cyk.append(val_c)
 
         print(f"\n{'Expresión':<10} {'ANTLR':>10} {'CYK':>10} {'Val ANTLR':>12} {'Val CYK':>12} {'Coinciden':>10}")
-        print("-" * 100)
+        print("-" * 80)
         idx = 0
         for linea in lineas:
             if not linea.strip():

@@ -64,32 +64,50 @@ def parsear_cyk(tokens):
 
 
 def evaluar_cyk(tokens_originales):
-    operadores = {'+', '-', '*', '/'}
-    pila = []
-    i = 0
     tokens = tokens_originales
+    pos = [0]  # usar lista para mutabilidad en funciones anidadas
 
-    def siguiente_expr(pos):
-        izq = float(tokens[pos]) if '.' in tokens[pos] else int(tokens[pos])
-        pos += 1
-        while pos < len(tokens) and tokens[pos] in operadores:
-            op = tokens[pos]
-            der = float(tokens[pos+1]) if '.' in tokens[pos+1] else int(tokens[pos+1])
-            if op == '+':
-                izq = izq + der
-            elif op == '-':
-                izq = izq - der
-            elif op == '*':
+    def parse_num():
+        tok = tokens[pos[0]]
+        pos[0] += 1
+        return float(tok) if '.' in tok else int(tok)
+
+    def parse_term():
+        # maneja número negativo como token "-" seguido de NUM
+        if tokens[pos[0]] == '-':
+            pos[0] += 1
+            val = parse_num()
+            return -val
+        return parse_num()
+
+    def parse_factor():
+        izq = parse_term()
+        while pos[0] < len(tokens) and tokens[pos[0]] in ('*', '/'):
+            op = tokens[pos[0]]
+            pos[0] += 1
+            der = parse_term()
+            if op == '*':
                 izq = izq * der
-            elif op == '/':
+            else:
                 if der == 0:
                     raise ZeroDivisionError("División por cero")
                 resultado = izq / der
                 izq = int(resultado) if resultado == int(resultado) else resultado
-            pos += 2
         return izq
 
-    return siguiente_expr(0)
+    def parse_expresion():
+        izq = parse_factor()
+        while pos[0] < len(tokens) and tokens[pos[0]] in ('+', '-'):
+            op = tokens[pos[0]]
+            pos[0] += 1
+            der = parse_factor()
+            if op == '+':
+                izq = izq + der
+            else:
+                izq = izq - der
+        return izq
+
+    return parse_expresion()
 
 
 if __name__ == "__main__":
