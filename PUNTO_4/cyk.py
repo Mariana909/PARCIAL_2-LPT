@@ -1,10 +1,27 @@
 import sys
+import re
 import time
 
+
+TOKEN_NUM = re.compile(r'^-?\d+(\.\d+)?$')
+
+
+def tokenizar_cyk(linea):
+    tokens = []
+    for tok in linea.strip().split():
+        if TOKEN_NUM.match(tok):
+            tokens.append("NUM")
+        else:
+            tokens.append(tok)
+    return tokens
+
+
 gramatica = {
-    "expresion": [["E1", "factor"], ["E2", "factor"], ["F1", "term"],
-                  ["F2", "term"], ["T_RES", "NUM"], ["NUM"]],
-    "factor":    [["F1", "term"], ["F2", "term"], ["T_RES", "NUM"], ["NUM"]],
+    "expresion": [["E1", "factor"], ["E2", "factor"],
+                  ["F1", "term"],   ["F2", "term"],
+                  ["T_RES", "NUM"], ["NUM"]],
+    "factor":    [["F1", "term"],   ["F2", "term"],
+                  ["T_RES", "NUM"], ["NUM"]],
     "term":      [["NUM"], ["T_RES", "NUM"]],
     "E1":        [["expresion", "T_SUM"]],
     "E2":        [["expresion", "T_RES"]],
@@ -14,13 +31,12 @@ gramatica = {
     "T_RES":     [["-"]],
     "T_MUL":     [["*"]],
     "T_DIV":     [["/"]],
-    "NUM":       [["<número>"]],  # cualquier token numérico
+    "NUM":       [["NUM"]],
 }
 simbolo_inicio = "expresion"
 
 
-
-def analizar_cyk(tokens):
+def parsear_cyk(tokens):
     n = len(tokens)
     if n == 0:
         return False
@@ -47,24 +63,57 @@ def analizar_cyk(tokens):
     return simbolo_inicio in tabla[0][n - 1]
 
 
+def evaluar_cyk(tokens_originales):
+    operadores = {'+', '-', '*', '/'}
+    pila = []
+    i = 0
+    tokens = tokens_originales
+
+    def siguiente_expr(pos):
+        izq = float(tokens[pos]) if '.' in tokens[pos] else int(tokens[pos])
+        pos += 1
+        while pos < len(tokens) and tokens[pos] in operadores:
+            op = tokens[pos]
+            der = float(tokens[pos+1]) if '.' in tokens[pos+1] else int(tokens[pos+1])
+            if op == '+':
+                izq = izq + der
+            elif op == '-':
+                izq = izq - der
+            elif op == '*':
+                izq = izq * der
+            elif op == '/':
+                if der == 0:
+                    raise ZeroDivisionError("División por cero")
+                resultado = izq / der
+                izq = int(resultado) if resultado == int(resultado) else resultado
+            pos += 2
+        return izq
+
+    return siguiente_expr(0)
+
+
 if __name__ == "__main__":
-    try:
-        if len(sys.argv) > 1:
-            entrada = sys.argv[1]
-            with open(entrada, "r") as archivo:
-                lineas = archivo.read().splitlines()
+    if len(sys.argv) < 2:
+        print("Uso: python3 cyk.py <archivo>")
+        sys.exit(1)
 
-            for linea in lineas:
-                if linea.strip() == "":
-                    continue
-                tokens = linea.strip().split()
-                t_0 = time.time()
-                resultado = analizar_cyk(tokens)
-                t_1 = time.time()
-                estado = "ACEPTADA" if resultado else "RECHAZADA"
-                print(f"{linea} -> {estado} ({t_1 - t_0:.6f} s)")
+    with open(sys.argv[1], "r") as f:
+        lineas = f.read().splitlines()
+
+    for linea in lineas:
+        if not linea.strip():
+            continue
+        tokens_norm = tokenizar_cyk(linea)
+        tokens_orig = linea.strip().split()
+
+        t_0 = time.time()
+        aceptada = parsear_cyk(tokens_norm)
+        t_1 = time.time()
+
+        if aceptada:
+            resultado = evaluar_cyk(tokens_orig)
+            estado = f"ACEPTADA  resultado = {resultado}"
         else:
-            print("No se detectó archivo de entrada")
+            estado = "RECHAZADA"
 
-    except FileNotFoundError:
-        print("No se encontró el archivo")
+        print(f"{linea} -> {estado} ({t_1 - t_0:.6f} s)")
