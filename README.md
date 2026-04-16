@@ -1,4 +1,4 @@
-# Parcial 2 — Lenguajes de Programación 2026-1
+# Parcial 2 — Lenguajes de Programación y Transducción
 
 Repositorio con las soluciones a los cinco puntos del parcial. Cada punto tiene su propia carpeta con su gramática, implementación y archivo de prueba.
 
@@ -24,7 +24,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### ANTLR4 tools (para regenerar parsers si se modifica alguna gramática)
+### ANTLR4 tools
 ```bash
 pip install antlr4-tools
 ```
@@ -45,6 +45,10 @@ La gramática completa en notación BNF se encuentra en [`PUNTOS_1_2/NoSQL_BNF.t
 - `DELETE <colección, ...> END` / `DELETE ALL END`
 
 Los valores pueden ser números, strings, identificadores, listas (`[v1, v2]`) o documentos anidados (`{campo: valor}`).
+
+### Conclusión
+
+La gramática BNF resultante es compacta y cubre los casos de uso fundamentales de un lenguaje NoSQL simplificado. La separación entre `campo_lista`, `lista_valor` y `doc_anidado` permite expresar estructuras de datos anidadas de forma natural, manteniendo la gramática libre de ambigüedades gracias a los delimitadores explícitos (`END`, `;`, `:`) que actúan como guías de parseo sin necesidad de lookahead extendido.
 
 ---
 
@@ -75,6 +79,57 @@ python3 PUNTOS_1_2/main.py PUNTOS_1_2/entrada.txt
 
 El archivo [`PUNTOS_1_2/entrada.txt`](PUNTOS_1_2/entrada.txt) contiene un ciclo completo de pruebas: dos `CREATE`, un `READ`, un `UPDATE`, otro `READ` y un `DELETE`.
 
+### Salida esperada
+
+```
+[CREATE] Documento agregado a la colección 'usuarios'
+[CREATE] Documento agregado a la colección 'usuarios'
+[CREATE] Documento agregado a la colección 'productos'
+
+[READ] Colección 'usuarios':
+  Documento 1:
+    {
+        "nombre": "Juan Pérez",
+        "edad": 25,
+        "activo": "true",
+        "direccion": {
+            "ciudad": "Bogotá",
+            "pais": "Colombia"
+        }
+    }
+  Documento 2:
+    {
+        "nombre": "María López",
+        "edad": 30,
+        "activo": "false",
+        "direccion": {
+            "ciudad": "Medellín",
+            "pais": "Colombia"
+        }
+    }
+
+[READ] Colección 'usuarios':
+[READ] Colección 'productos':
+  ...
+
+[UPDATE] Colección 'usuarios' actualizada
+
+[READ] Colección 'usuarios':
+  Documento 1:
+    { ..., "activo": "true", "edad": 31 }
+  Documento 2:
+    { ..., "activo": "true", "edad": 31 }
+
+[DELETE] Colección 'productos' eliminada
+
+[READ] Colección 'usuarios':
+  ...
+```
+
+### Conclusión
+
+El visitor demuestra que ANTLR4 permite separar limpiamente el análisis sintáctico de la semántica: el parser generado se encarga exclusivamente de verificar la estructura, mientras que el visitor implementa el comportamiento. La representación en memoria como diccionarios de Python resulta suficiente para simular las operaciones CRUD básicas; una extensión natural sería añadir filtros en `READ` y `UPDATE` para operar sobre documentos específicos en lugar de colecciones enteras.
+
 ---
 
 ## Punto 3 — Ambigüedad en la gramática if-then-else
@@ -93,19 +148,22 @@ prop_emparejada  → if expr then prop_emparejada else prop
                  | otras
 ```
 
-Esta gramática **sigue siendo ambigua**. La cadena que lo demuestra es:
+Esta gramática **es ambigua**. La cadena que lo demuestra es:
 
 ```
 if e1 then if e2 then otras else otras
 ```
 
-Para esta misma cadena se pueden construir **dos árboles de derivación distintos**, dependiendo de con cuál `then` se empareja el `else`. Los árboles se generaron con la herramienta online [https://mshang.ca/syntree/](https://mshang.ca/syntree/):
+Para esta misma cadena se pueden construir **dos árboles de derivación distintos**, dependiendo de con cuál `then` se empareja el `else`. Los árboles se graficaron con la herramienta online [https://mshang.ca/syntree/](https://mshang.ca/syntree/):
 
-> *(insertar aquí las imágenes de los dos árboles)*
+<img width="1114" height="326" alt="image" src="https://github.com/user-attachments/assets/2181428b-222b-40d6-9df2-a4953d19e133" 
+
+<img width="649" height="326" alt="image" src="https://github.com/user-attachments/assets/0298242c-9c69-43ba-b611-885f756d51c7" />
+
 
 ### Solución
 
-Se resolvió la ambigüedad aplicando la solución clásica descrita en **Compiladores: Principios, técnicas y herramientas** (Aho, Lam, Sethi, Ullman — 2.ª ed., cap. 4, pág. 180): distinguir explícitamente entre proposiciones *emparejadas* y *no emparejadas*, de modo que cualquier proposición entre un `then` y un `else` deba estar completamente emparejada.
+Se resolvió la ambigüedad aplicando la solución clásica descrita en el capítulo 4 de **Compiladores: Principios, técnicas y herramientas** (Aho, Sethi y Ullman): distinguir explícitamente entre proposiciones *emparejadas* y *no emparejadas*, de modo que cualquier proposición entre un `then` y un `else` deba estar completamente emparejada.
 
 La gramática no ambigua resultante (guardada en [`PUNTO_3/G_ARREGLADA.txt`](PUNTO_3/G_ARREGLADA.txt)) es:
 
@@ -122,6 +180,10 @@ prop_no_emparejada → if expr then prop
 
 Esta gramática genera exactamente el mismo lenguaje pero permite un único árbol de derivación para cada cadena válida.
 
+### Conclusión
+
+La ambigüedad del `dangling else` es un problema clásico que afecta a prácticamente todo lenguaje con condicionales anidados. La solución de separar producciones emparejadas y no emparejadas elimina la ambigüedad de forma formal y sin alterar el lenguaje generado. La mayoría de lenguajes reales resuelven este problema de manera pragmática (asociando el `else` con el `if` más cercano), pero la corrección gramatical explícita es preferible cuando se requiere una especificación formal precisa.
+
 ---
 
 ## Punto 4 — CYK vs Parser predictivo (ANTLR4)
@@ -130,13 +192,13 @@ Esta gramática genera exactamente el mismo lenguaje pero permite un único árb
 
 ### Gramática de la calculadora
 
-Se reutilizó la gramática aritmética implementada en ANTLR4 en entregas anteriores (`PUNTO_4/ANTLR/GRAMATICA/izqNormal.g4`), que define expresiones con `+`, `-`, `*`, `/` y números con signo.
+Se reutilizó la gramática aritmética implementada en ANTLR4 en entregas anteriores [`ASOCIATIVIDAD_PRECEDENCIA/IZQ_NORMAL`](https://github.com/Mariana909/ASOCIATIVIDAD_PRECEDENCIA/tree/main/IZQ_NORMAL)(`PUNTO_4/ANTLR/GRAMATICA/izqNormal.g4`), que define expresiones con `+`, `-`, `*`, `/` y números con signo.
 
 ### Transformación a Forma Normal de Chomsky (FNC)
 
 CYK requiere que la gramática esté en FNC. La gramática original es recursiva a izquierda con producciones ternarias, por lo que la transformación requiere cuatro pasos.
 
-**Gramática original** (simplificada):
+**Gramática original**:
 ```
 expresion → expresion + factor | expresion - factor | factor
 factor    → factor * term | factor / term | term
@@ -174,21 +236,9 @@ T_SUM → +  |  T_RES → -  |  T_MUL → *  |  T_DIV → /
 
 Esta FNC está implementada en [`PUNTO_4/cyk.py`](PUNTO_4/cyk.py).
 
-### Comparación de rendimiento
-
-| Parser | Complejidad | Tiempo (~150 tokens) |
-|--------|-------------|----------------------|
-| ANTLR4 (LL\*) | O(n) | ≈ 0.01 s |
-| CYK (prog. dinámica) | O(n³) | ≈ 1.6 s |
-
-ANTLR4 usa estrategia LL(\*) con predicción adaptativa, lo que le permite analizar en tiempo lineal. CYK construye una tabla de n² celdas donde cada celda requiere hasta n comparaciones, resultando en complejidad cúbica inevitable.
-
 ### Ejecución
 
 ```bash
-# Generar entradas de prueba
-python3 PUNTO_4/genEntrada.py
-
 # Comparación completa con gráfica
 python3 PUNTO_4/comparacion.py PUNTO_4/entrada.txt
 
@@ -198,6 +248,38 @@ python3 PUNTO_4/cyk.py PUNTO_4/entrada.txt
 # Solo ANTLR
 python3 PUNTO_4/ANTLR/main.py PUNTO_4/entrada.txt
 ```
+
+### Salida esperada
+
+```
+Expresión       ANTLR        CYK    Val ANTLR      Val CYK  Coinciden
+--------------------------------------------------------------------------------
+         1   ACEPTADA   ACEPTADA            3            3         SI
+         2   ACEPTADA   ACEPTADA            6            6         SI
+         3   ACEPTADA   ACEPTADA            4            4         SI
+         4   ACEPTADA   ACEPTADA           20           20         SI
+         5   ACEPTADA   ACEPTADA           14           14         SI
+         ...
+        29   ACEPTADA   ACEPTADA         2826         2826         SI
+
+Gráfica guardada en comparacion.png
+```
+
+<img width="1281" height="818" alt="image" src="https://github.com/user-attachments/assets/9ef34da0-8890-4def-aecf-250b2866ef8e" />
+
+
+Todas las expresiones son aceptadas por ambos parsers y los valores calculados coinciden, confirmando que la FNC implementada es equivalente a la gramática original y que el evaluador respeta la precedencia de operadores.
+
+### Comparación de rendimiento
+
+| Parser | Complejidad | Tiempo (~31 tokens) |
+|--------|-------------|----------------------|
+| ANTLR4 | O(n) | ≈ 0.01 s |
+| CYK  | O(n³) | ≈ 0.9 s |
+
+### Conclusión
+
+La diferencia de rendimiento entre ambos enfoques es drástica y refleja directamente sus complejidades teóricas. ANTLR4 aprovecha la estructura determinista de la gramática LL para analizar en tiempo lineal, mientras que CYK paga el costo de ser un algoritmo de propósito general capaz de manejar cualquier gramática libre de contexto en FNC. Para gramáticas de expresiones aritméticas, donde la precedencia y asociatividad están bien definidas, un parser LL es siempre la opción práctica; CYK resulta útil cuando la gramática es ambigua o cuando se requiere un reconocedor general sin comprometerse con un estilo de parseo particular.
 
 ---
 
@@ -250,3 +332,23 @@ python3 PUNTO_5/parser_G3_ampliada.py PUNTO_5/entrada.txt
 ```
 
 El archivo [`PUNTO_5/entrada.txt`](PUNTO_5/entrada.txt) incluye asignaciones simples, condicionales sin `else`, con `else`, y anidados, cubriendo los casos de ambas reglas de `prop`.
+
+### Salida esperada
+
+```
+ACEPTADA  "x = 5"
+ACEPTADA  "y = x"
+ACEPTADA  "if x < 10 then otras"
+ACEPTADA  "if x == y then otras else otras"
+ACEPTADA  "if x > 0 then if y < 5 then otras else otras"
+ACEPTADA  "if x != 0 then otras else if y == 1 then otras else otras"
+```
+
+Para cada línea aceptada se genera además una imagen PNG con el árbol sintáctico correspondiente.
+
+<img width="1485" height="1033" alt="image" src="https://github.com/user-attachments/assets/bdac5eba-d648-41bf-9e80-9dfabe84992e" />
+
+
+### Conclusión
+
+El parser descendente recursivo con backtracking demuestra de forma práctica cómo la gramática no ambigua del punto 3 guía directamente la estructura del código: cada regla de producción se traduce en una función, y la distinción entre `prop_emparejada` y `prop_no_emparejada` en la gramática se refleja en funciones separadas que evitan la ambigüedad en tiempo de parseo. El backtracking permite manejar alternativas sin necesidad de calcular conjuntos FIRST/FOLLOW explícitamente, a costa de un peor caso exponencial en gramáticas muy ambiguas; para esta gramática en particular el backtracking es acotado y el rendimiento es aceptable.
