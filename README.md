@@ -192,7 +192,7 @@ La ambigüedad del `dangling else` es un problema clásico que afecta a práctic
 
 ### Gramática de la calculadora
 
-Se reutilizó la gramática aritmética implementada en ANTLR4 en entregas anteriores [`ASOCIATIVIDAD_PRECEDENCIA/IZQ_NORMAL`](https://github.com/Mariana909/ASOCIATIVIDAD_PRECEDENCIA/tree/main/IZQ_NORMAL)(`PUNTO_4/ANTLR/GRAMATICA/izqNormal.g4`), que define expresiones con `+`, `-`, `*`, `/` y números con signo.
+Se reutilizó la gramática aritmética implementada en ANTLR4 en entregas anteriores [`ASOCIATIVIDAD_PRECEDENCIA/IZQ_NORMAL`](https://github.com/Mariana909/ASOCIATIVIDAD_PRECEDENCIA/tree/main/IZQ_NORMAL)(`PUNTO_4/ANTLR/GRAMATICA/izqNormal.g4`), que define expresiones con `+`, `-`, `*`, `/` y números con signo, también se usó como base las implementaciones (cyk.py y comparacion.py) del repositorio [COMPARACION_COMPLEJIDAD](https://github.com/Mariana909/COMPARACION_COMPLEJIDAD.git), ajustándolas a la gramática de izqNormal y modificando un poco la salida de comparacion.py.
 
 ### Transformación a Forma Normal de Chomsky (FNC)
 
