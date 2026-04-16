@@ -2,28 +2,22 @@ import sys
 import time
 
 gramatica = {
-    "S":     [["A_1", "C"],
-              ["A_a", "B"],
-              ["A_2", "S"],
-              ["A_3", "S"]],
-    "A_2":   [["A_1", "C"]],
-    "A_3":   [["A_a", "B"]],
-    "A":     [["A_1", "C"],
-              ["A_a", "B"]],
-    "A_1":   [["A_a", "B"]],
-    "A_a":   [["a"]],
-    "B":     [["B_b",  "B_bas"],
-              ["B_C",  "BOSS"],
-              ["BIG",  "BOSS"]],
-    "B_C":   [["BIG", "C"]],
-    "B_b":   [["b"]],
-    "B_bas": [["bas"]],
-    "BIG":   [["big"]],
-    "BOSS":  [["boss"]],
-    "C":     [["c"]],
+    "expresion": [["E1", "factor"], ["E2", "factor"], ["F1", "term"],
+                  ["F2", "term"], ["T_RES", "NUM"], ["NUM"]],
+    "factor":    [["F1", "term"], ["F2", "term"], ["T_RES", "NUM"], ["NUM"]],
+    "term":      [["NUM"], ["T_RES", "NUM"]],
+    "E1":        [["expresion", "T_SUM"]],
+    "E2":        [["expresion", "T_RES"]],
+    "F1":        [["factor", "T_MUL"]],
+    "F2":        [["factor", "T_DIV"]],
+    "T_SUM":     [["+"]],
+    "T_RES":     [["-"]],
+    "T_MUL":     [["*"]],
+    "T_DIV":     [["/"]],
+    "NUM":       [["<número>"]],  # cualquier token numérico
 }
+simbolo_inicio = "expresion"
 
-simbolo_inicio = "S"
 
 
 def analizar_cyk(tokens):
