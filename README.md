@@ -272,7 +272,7 @@ Todas las expresiones son aceptadas por ambos parsers y los valores calculados c
 
 ### Comparación de rendimiento
 
-| Parser | Complejidad | Tiempo (~31 tokens) |
+| Parser | Complejidad | Tiempo (~57 tokens) |
 |--------|-------------|----------------------|
 | ANTLR4 | O(n) | ≈ 0.01 s |
 | CYK  | O(n³) | ≈ 0.9 s |
